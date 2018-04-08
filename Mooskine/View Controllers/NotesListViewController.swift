@@ -14,6 +14,9 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
 
     /// The notebook whose notes are being displayed
     var notebook: Notebook!
+    
+    // EMPTY NOTES ARRAY TO COMMUNICATE WITH CORE DATA
+    var notes: [Note] = []
 
     /// A date formatter for date text in note cells
     let dateFormatter: DateFormatter = {
@@ -51,14 +54,16 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
 
     // Adds a new `Note` to the end of the `notebook`'s `notes` array
     func addNote() {
-        notebook.addNote()
+//        // TODO: Add Note
+//        notebook.addNote()
         tableView.insertRows(at: [IndexPath(row: numberOfNotes - 1, section: 0)], with: .fade)
         updateEditButtonState()
     }
 
     // Deletes the `Note` at the specified index path
     func deleteNote(at indexPath: IndexPath) {
-        notebook.removeNote(at: indexPath.row)
+//        // TODO: Remove note
+//        notebook.removeNote(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .fade)
         if numberOfNotes == 0 {
             setEditing(false, animated: true)
@@ -92,8 +97,10 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
 
         // Configure cell
         cell.textPreviewLabel.text = aNote.text
-        cell.dateLabel.text = dateFormatter.string(from: aNote.creationDate)
-
+        // OPTIONALLY UNWRAP aNote.creationDate
+        if let creationDate = aNote.creationDate {
+            cell.dateLabel.text = dateFormatter.string(from: creationDate)
+        }
         return cell
     }
 
@@ -105,11 +112,11 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
     }
 
     // Helpers
-
-    var numberOfNotes: Int { return notebook.notes.count }
+    // UPDATE FUNCTION AND PROPERTIES TO USE FILE DEFINED NOTES ARRAY
+    var numberOfNotes: Int { return notes.count }
 
     func note(at indexPath: IndexPath) -> Note {
-        return notebook.notes[indexPath.row]
+        return notes[indexPath.row]
     }
 
     // -------------------------------------------------------------------------

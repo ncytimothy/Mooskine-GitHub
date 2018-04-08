@@ -27,8 +27,11 @@ class NoteDetailsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let creationDate = note.creationDate {
+            // OPTIONAL UNWRAPPING FOR CREATION DATE
+            navigationItem.title = dateFormatter.string(from: creationDate)
 
-        navigationItem.title = dateFormatter.string(from: note.creationDate)
+        }
         textView.text = note.text
     }
 
