@@ -12,10 +12,25 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    // DataController property for persistent store
+    let dataController = DataController(modelName: "Mooskine")
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Call dataController.load() to load persistent store
+        // Note that the trailing closure parameter attached to the .load() gives
+        // us the capability to present a loading UI while persisted data is
+        // being retrieved
+        
+       dataController.load()
+        
+        //        // USE IF NEEDED
+        //        dataController.load {
+        //            // Update the main UI after persistent store is loaded
+        //        }
+        //
+        
         return true
     }
 
