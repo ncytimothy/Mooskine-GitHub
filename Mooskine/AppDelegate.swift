@@ -25,6 +25,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
        dataController.load()
         
+        // Configure the first view
+        // Get NavigationController from the window's rootViewController
+        // Navigation Controller's top view is the NotebooksListViewController
+        // Set travelLoationsViewController' data controller property to the AppDelegate's dataController
+        // This will inject the dataController depency into the TravelLoationsViewController
+        let navigationController = window?.rootViewController as! UINavigationController
+        let notebooksListViewController = navigationController.topViewController as! NotebooksListViewController
+        notebooksListViewController.dataController = dataController
+        
         //        // USE IF NEEDED
         //        dataController.load {
         //            // Update the main UI after persistent store is loaded
