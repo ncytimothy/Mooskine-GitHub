@@ -110,15 +110,55 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
 
     /// Adds a new notebook to the end of the `notebooks` array
     func addNotebook(name: String) {
-//        //TODO: Add Notebook
-//        let notebook = Notebook(name: name)
-//        notebooks.append(notebook)
-        tableView.insertRows(at: [IndexPath(row: numberOfNotebooks - 1, section: 0)], with: .fade)
+        /**
+        * MAKE CHANGES IN A CONTEXT AND THEN ASK THE CONTEXT TO SAVE THE CHANGES
+        * TO THE PERSISTENT STORE
+        */
+        
+        // NOTEBOOK IS AN MANAGED OBJECT
+        // WE WILL USE CONVENIENCE INITIALIZER FROM MANAGED OBJECTS
+        // WE CAN ASSOCIATE THE OBJECT WITH A CONTEXT
+        let notebook = Notebook(context: dataController.viewContext)
+        notebook.name = name
+        notebook.creationDate = Date()
+        
+        // AS SOON AS THE NOTEBOOK IS CREATED, WE WILL ASK THE CONTEXT TO SAVE THE NOTEBOOK INTO THE PERSISTENT STORE
+        // YOU CAN USE try? TO CONVERT THE ERROR INTO AN OPTIONAL
+        // IN A PRODUCTION APP, YOU WILL WANT TO NOTIFY THE USER IF THE DATA HASN'T BEEN SAVED
+        do {
+            try dataController.viewContext.save()
+        } catch {
+            let alert = UIAlertController(title: "Cannot save notebook", message: "Your notebook cannot be saved at the moment. Please try again later.", preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alert.addAction(okAction)
+        }
+     
+        // INSERT NOTEBOOK AT POSITION 0, SINCE NOTEBOOKS ARE ORDERED BY CREATION DATE (LATEST ON TOP)
+        // WE WILL ALSO INSERT THE NOTEBOOK INTO THE 0TH ROW OF THE TABLE
+        
+        notebooks.insert(notebook, at: 0)
+        tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .fade)
         updateEditButtonState()
     }
 
     /// Deletes the notebook at the specified index path
     func deleteNotebook(at indexPath: IndexPath) {
+        // 1. GET A REFERENCE TO THE NOTEBOOK TO DELETE
+        // Using notebook(at:) "index path" helper function
+        let notebookToDelete = notebook(at: indexPath)
+        
+        // 2. CALL THE CONTEXT'S DELETE FUNCTON PASSSING IN notebookToDelete
+        dataController.viewContext.delete(notebookToDelete)
+        
+        // 3. TRY TO SAVE THE CHANGE TO THE PERSISTENT STORE
+        do {
+            try dataController.viewContext.save()
+        } catch {
+            let alert = UIAlertController(title: "Cannot delete notebook", message: "Your notebook cannot be deleted at the moment. Please try again later.", preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alert.addAction(okAction)
+        }
+        
         notebooks.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .fade)
         if numberOfNotebooks == 0 {
