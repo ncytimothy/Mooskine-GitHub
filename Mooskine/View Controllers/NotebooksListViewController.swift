@@ -44,7 +44,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
-        // 3. USE THE FETCH REQUEST
+        // 3. PERFORM THE FETCH REQUEST
         // ASK A CONTEXT TO EXECUTE THE REQUEST
         // ASK DATA CONTROLLER'S VIEW CONTEXT (PERSISTENT CONTROLLER'S VIEW CONTEXT)
         // .fetch() CAN THROW AN ERROR
@@ -118,13 +118,18 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         // NOTEBOOK IS AN MANAGED OBJECT
         // WE WILL USE CONVENIENCE INITIALIZER FROM MANAGED OBJECTS
         // WE CAN ASSOCIATE THE OBJECT WITH A CONTEXT
+        // 1. INSTANTIATE A MANAGED OBJECT
         let notebook = Notebook(context: dataController.viewContext)
+        
+        // 2..CONFIGURE THE NOTEBOOK MANAGED OBJECT
         notebook.name = name
         notebook.creationDate = Date()
         
+        // 3. SAVE THE NOTE ASSOCIATED WITH A CONTEXT
         // AS SOON AS THE NOTEBOOK IS CREATED, WE WILL ASK THE CONTEXT TO SAVE THE NOTEBOOK INTO THE PERSISTENT STORE
         // YOU CAN USE try? TO CONVERT THE ERROR INTO AN OPTIONAL
         // IN A PRODUCTION APP, YOU WILL WANT TO NOTIFY THE USER IF THE DATA HASN'T BEEN SAVED
+   
         do {
             try dataController.viewContext.save()
         } catch {
@@ -133,6 +138,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             alert.addAction(okAction)
         }
      
+        // 4. UPDATE UI
         // INSERT NOTEBOOK AT POSITION 0, SINCE NOTEBOOKS ARE ORDERED BY CREATION DATE (LATEST ON TOP)
         // WE WILL ALSO INSERT THE NOTEBOOK INTO THE 0TH ROW OF THE TABLE
         
@@ -159,7 +165,9 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             alert.addAction(okAction)
         }
         
+        // 4. REMOVE THE DELETED NOTEBOOK FROM THE NOTEBOOKS ARRAY
         notebooks.remove(at: indexPath.row)
+        
         tableView.deleteRows(at: [indexPath], with: .fade)
         if numberOfNotebooks == 0 {
             setEditing(false, animated: true)
@@ -224,8 +232,11 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         // If this is a NotesListViewController, we'll configure its `Notebook`
         if let vc = segue.destination as? NotesListViewController {
             if let indexPath = tableView.indexPathForSelectedRow {
+                // NOTEBOOK PASSING TO THE NotesListViewVC
                 vc.notebook = notebook(at: indexPath)
             }
+            // PASSING THE dataController from NotebooksListViewVC to NotesListViewVC
+            vc.dataController = dataController
         }
     }
 }

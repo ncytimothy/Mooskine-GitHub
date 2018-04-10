@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class NoteDetailsViewController: UIViewController {
     /// A text view that displays a note's text
@@ -14,7 +15,7 @@ class NoteDetailsViewController: UIViewController {
 
     /// The note being displayed and edited
     var note: Note!
-
+    
     /// A closure that is run when the user asks to delete the current note
     var onDelete: (() -> Void)?
 
