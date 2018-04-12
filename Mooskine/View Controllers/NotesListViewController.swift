@@ -91,8 +91,6 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
         }
         // RELOAD DATA ONCE THE TABLE VIEW WILL APPEAR
         tableView.reloadData()
-        
-        //fix 
     }
 
     // -------------------------------------------------------------------------
@@ -192,7 +190,6 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        print("cellForRowAt called")
         let aNote = note(at: indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: NoteCell.defaultReuseIdentifier, for: indexPath) as! NoteCell
 

@@ -61,7 +61,45 @@ class DataController {
             guard error == nil else {
                 fatalError(error!.localizedDescription)
             }
+            // KICK OFF THE INITIAL AUTOSAVE
+            self.autoSaveViewContext()
             completion?()
         }
     }
+}
+
+extension DataController {
+    
+    // SAVING ON A TIMER (AUTOSAVING)
+    // SET A FUNCTION TO BE CALLED AT REGULAR INTERVALS
+    // EACH TIME THE INTERVAL PASSES, IF THE CONTEXT HAS ANY CHANGES
+    // WE WILL TRY SAVING IT TO THE STORE
+    // WRITE A METHOD THAT SAVES THE VIEW CONTEXT AND RECURSIVELY CALLS ITSELF AGAIN EVERY SO OFTEN
+    
+    
+    func autoSaveViewContext(interval: TimeInterval = 30) {
+        // TimeInterval PARAMETER VALUE DEFAULTED TO 30s
+        
+        // GUARD POSITIVE TIME INTERVALS
+        guard interval > 0 else {
+            print("Cannot save negative interval")
+            return
+        }
+        // NOTE THAT WE SHOULD NOT ALERT THE USER IF THE SAVE FAILS
+        // WE WILL TRY IN THE NEXT INTERVAL
+        // CHECK IF THE VIEW CONTEXT HAS CHANGES
+        if viewContext.hasChanges {
+            try? viewContext.save()
+        }
+        
+        // RECURSIVE CALL OF THE FUNCTION ITSELF ON MAIN QUEUE
+        // NOTICE THAT AFTER THE INTERVAL (30s) HAS PASSED FROM NOW
+        // YOU WILL SEE THAT .autoSaveViewContext(interval: interval) is being called as a closure expression
+        // THEREFORE THE FUNCTION CALL IS RECURSIVE
+        DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
+            self.autoSaveViewContext(interval: interval)
+        }
+    }
+    
+    
 }
