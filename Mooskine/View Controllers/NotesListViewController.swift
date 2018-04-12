@@ -157,7 +157,8 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
             alert.addAction(okAlert)
         }
         
-        // 4.
+        // 4. REMOVE THE NOTE FROM THE NOTES ARRAY
+        notes.remove(at: indexPath.row)
         
         tableView.deleteRows(at: [indexPath], with: .fade)
         if numberOfNotes == 0 {

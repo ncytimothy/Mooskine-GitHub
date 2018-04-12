@@ -62,6 +62,8 @@ extension NoteDetailsViewController {
 
 extension NoteDetailsViewController: UITextViewDelegate {
     func textViewDidEndEditing(_ textView: UITextView) {
+        
+        // MANAGED OBJECTS HOLD A REFERENCE TO THEIR ASSOCIATED VIEW CONTEXT
         note.text = textView.text
     }
 }
