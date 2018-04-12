@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class NotebooksListViewController: UIViewController, UITableViewDataSource, NSFetchedResultsControllerDelegate {
+class NotebooksListViewController: UIViewController, UITableViewDataSource {
     /// A table view that displays a list of notebooks
     @IBOutlet weak var tableView: UITableView!
 
@@ -77,8 +77,8 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource, NSFe
         
         setUpFetchedResultsController()
         
-        // 5. IMPLEMENT DELEGATE METHODS FOR FETCHED RESULTS CONTROLLER
-        // LATER (IN EXTENSION)
+        // 5. IMPLEMENT DELEGATE METHODS FOR FETCHED RESULTS CONTROLLER TO TRACK CHANGES
+        // (IN EXTENSION)
         
     }
 
@@ -266,4 +266,41 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource, NSFe
             vc.dataController = dataController
         }
     }
+}
+
+extension NotebooksListViewController: NSFetchedResultsControllerDelegate {
+    
+    // TABLE VIEW CHANGES NEED TO BE BOOKENDED BETWEEN .beginUpdates() AND .endUpdates() CALLS
+    // REACTIVE TABLE VIEW THAT AUTOMATICALLY RESPONSES TO INSERTS AND DELETES
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        // GETS CALLED BEFORE A BATCH OF UPDATES
+        tableView.beginUpdates()
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.endUpdates()
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        // Notifies the receiver that a fetched object has been changed due to an add, remove, move, or update.
+        // type is an enum
+        
+        // ONLY IMPLEMENT INSERT AND DELETE
+        
+        switch type {
+        case .insert:
+            // INSERT THE ADDED OBJECT TO THE TABLE VIEW WITH newIndexPath
+            tableView.insertRows(at: [newIndexPath!], with: .fade)
+            break
+        case .delete:
+            // indexPath PARAMETER CONTAINS THE INDEX PATH OF THE ROW TO DELETE
+            tableView.deleteRows(at: [indexPath!], with: .fade)
+            break
+        default:
+            break
+        }
+        
+    }
+    
 }
