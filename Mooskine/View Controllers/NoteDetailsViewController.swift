@@ -16,6 +16,9 @@ class NoteDetailsViewController: UIViewController {
     /// The note being displayed and edited
     var note: Note!
     
+    // IMPLICITLY UNWRAPPED DATACONTROLLER PROPERTY
+    var dataController: DataController!
+    
     /// A closure that is run when the user asks to delete the current note
     var onDelete: (() -> Void)?
 
@@ -62,8 +65,16 @@ extension NoteDetailsViewController {
 
 extension NoteDetailsViewController: UITextViewDelegate {
     func textViewDidEndEditing(_ textView: UITextView) {
-        
         // MANAGED OBJECTS HOLD A REFERENCE TO THEIR ASSOCIATED VIEW CONTEXT
+        // try? SAVING THE CONTEXT TO PERSIST THE APP'S UNSAVED CHANGES
         note.text = textView.text
+        do {
+//            try note.managedObjectContext?.save()
+            try dataController.viewContext.save()
+        } catch {
+            let alert = UIAlertController(title: "Cannot save note", message: "Your note cannot be saved at the moment. Please try again later.", preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alert.addAction(okAction)
+        }
     }
 }

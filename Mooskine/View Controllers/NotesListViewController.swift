@@ -89,6 +89,8 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
             tableView.deselectRow(at: indexPath, animated: false)
             tableView.reloadRows(at: [indexPath], with: .fade)
         }
+        // RELOAD DATA ONCE THE TABLE VIEW WILL APPEAR
+        tableView.reloadData()
     }
 
     // -------------------------------------------------------------------------
@@ -128,7 +130,7 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
         do {
             try dataController.viewContext.save()
         } catch {
-            let alert = UIAlertController(title: "Cannote save note", message: "Your note cannot be saved at the moment. Please try again later.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Cannote add note", message: "Your note cannot be added at the moment. Please try again later.", preferredStyle: .alert)
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
         }
@@ -188,6 +190,7 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        print("cellForRowAt called")
         let aNote = note(at: indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: NoteCell.defaultReuseIdentifier, for: indexPath) as! NoteCell
 
@@ -224,6 +227,8 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
         if let vc = segue.destination as? NoteDetailsViewController {
             if let indexPath = tableView.indexPathForSelectedRow {
                 vc.note = note(at: indexPath)
+                // PASSING THE DATA CONTROLLER PROPERTY
+                vc.dataController = dataController
 
                 vc.onDelete = { [weak self] in
                     if let indexPath = self?.tableView.indexPathForSelectedRow {
