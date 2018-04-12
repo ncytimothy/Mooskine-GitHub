@@ -9,15 +9,17 @@
 import UIKit
 import CoreData
 
-class NotebooksListViewController: UIViewController, UITableViewDataSource {
+class NotebooksListViewController: UIViewController, UITableViewDataSource, NSFetchedResultsControllerDelegate {
     /// A table view that displays a list of notebooks
     @IBOutlet weak var tableView: UITableView!
 
-    /// The `Notebook` objects being presented
-    var notebooks: [Notebook] = []
     
     // Data Controller property from AppDelegate.swift
     var dataController: DataController!
+    
+    // FETCHED RESULTS CONTROLLER WILL PERSIST OVER THE LIFETIME OF THE VIEW CONTROLLER
+    // NEED TO SPECIFY THE MANAGED OBJECT (GENERIC TYPE)
+    var fetchedResultsController: NSFetchedResultsController<Notebook>!
     
     // FETCH REQUEST
     // SELECTS INTERESTED DATA
@@ -25,12 +27,59 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
     // MUST BE CONFIGURED WITH AN ENTITY TYPE
     // CAN OPTIONALLY INCLUDE FILTERING AND SORTING
     
+    fileprivate func setUpFetchedResultsController() {
+        // TO INSTANTIATE A FETCHED RESULTS CONTROLLER
+        // WE NEED TO TELL IT WHICH DATA OBJECTS TO FETCH AND TRACK
+        // WE NEED TO DESCRIBE THE DATA WE WANT USING A FETCH REQUEST
+        
+        // WE CAN USE THE SAME FETCH REQUEST FROM BEFORE
+        // GENERALLY, FETCH REQUESTS DO NOT HAVE TO BE SORTED
+        // IMPORTANT: ANY FETCH REQUESTS USING A FETCHED RESULTS CONTROLLER MUST BE SORTED
+        // THIS IS PRESERVE CONSISTENT ORDERING
+        
+        // 1. CREATE FETCH REQUEST
+        // FETCH REQUESTS ARE GENERIC TYPES, SO YOU SPECIFY THE TYPE PARAMETER
+        // SPECIFYING THE TYPE PARAMETER WILL MAKE THE FETCH REQUEST
+        // WORK WITH A SPECIFIC MANAGED OBJECT SUBCLASS
+        // CALL THE TYPE FUNCTON FETCH REQUEST ON THAT SUBCLASS
+        // Pin.fetchRequest() returns a fetch request initialized with the entity
+        
+        let fetchRequest: NSFetchRequest<Notebook> = Notebook.fetchRequest()
+        
+        // 2. CONFIGURE FETCH REQUEST BY ADDING A SORT RULE
+        // fetchRequest.sortDescriptors property takes an array of sort descriptors
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        // 2. INSTANTIATE THE FETCHED RESULTS CONTROLLER USING THE FETCH REQUEST
+        // sectionNameKeyPath: divides data into sections
+        // cacheName: LATER
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        // 3. SET THE FETCHED RESULTS CONTROLLER DELEGATE PROPERTY TO SELF
+        // FETCHED RESULTS CONTROLLER TRACKS CHANGES
+        // TO RESPONSE TO THOSE CHANGES, NEED TO IMPLEMENT SOME DELEGATE METHODS
+        fetchedResultsController.delegate = self
+        
+        // 4. PERFORM FETCH TO LOAD DATA AND START TRACKING
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            // FATAL ERROR IS THROWN IF FETCH FAILS
+            fatalError("The fetch cannot be performed: \(error.localizedDescription)")
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "toolbar-cow"))
         navigationItem.rightBarButtonItem = editButtonItem
         
-        reloadNotebooks()
+        setUpFetchedResultsController()
+        
+        // 5. IMPLEMENT DELEGATE METHODS FOR FETCHED RESULTS CONTROLLER
+        // LATER (IN EXTENSION)
+        
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -40,6 +89,13 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             tableView.deselectRow(at: indexPath, animated: false)
             tableView.reloadRows(at: [indexPath], with: .fade)
         }
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        // NEED TO REMOVE FETCHED RESULTS CONTROLLER WHEN VIEW DISAPPEARS
+        // TO UNSUBSCRIBE TO MANAGED OBJECT CONTEXT CHANGES AND SAVES NOTIFICATIONS
+        fetchedResultsController = nil
     }
 
     // -------------------------------------------------------------------------
@@ -114,43 +170,16 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         }
      
         // 4. UPDATE UI
-        reloadNotebooks()
+        
     }
     
-    fileprivate func reloadNotebooks() {
-        // 1. CREATE FETCH REQUEST
-        // FETCH REQUESTS ARE GENERIC TYPES, SO YOU SPECIFY THE TYPE PARAMETER
-        // SPECIFYING THE TYPE PARAMETER WILL MAKE THE FETCH REQUEST
-        // WORK WITH A SPECIFIC MANAGED OBJECT SUBCLASS
-        // CALL THE TYPE FUNCTON FETCH REQUEST ON THAT SUBCLASS
-        // Pin.fetchRequest() returns a fetch request initialized with the entity
-        
-        let fetchRequest: NSFetchRequest<Notebook> = Notebook.fetchRequest()
-        
-        // 2. CONFIGURE FETCH REQUEST BY ADDING A SORT RULE
-        // fetchRequest.sortDescriptors property takes an array of sort descriptors
-        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        // 3. PERFORM THE FETCH REQUEST
-        // ASK A CONTEXT TO EXECUTE THE REQUEST
-        // ASK DATA CONTROLLER'S VIEW CONTEXT (PERSISTENT CONTROLLER'S VIEW CONTEXT)
-        // .fetch() CAN THROW AN ERROR
-        // SAVE THE RESULTS ONLY IF THE FETCH IS SUCCESSFUL
-        // USE try? TO CONVERT THE ERROR INTO AN OPTIONAL
-        if let result = try? dataController.viewContext.fetch(fetchRequest) {
-            notebooks = result
-            tableView.reloadData()
-        }
-        
-        updateEditButtonState()
-    }
 
     /// Deletes the notebook at the specified index path
     func deleteNotebook(at indexPath: IndexPath) {
         // 1. GET A REFERENCE TO THE NOTEBOOK TO DELETE
-        // Using notebook(at:) "index path" helper function
-        let notebookToDelete = notebook(at: indexPath)
+        // Using notebook(at:) "index path" helper function (PREVIOUSLY)
+        // NOW USE THE FETCHED RESULTS CONTROLLER .object(at:) indexPath method
+        let notebookToDelete = fetchedResultsController.object(at: indexPath)
         
         // 2. CALL THE CONTEXT'S DELETE FUNCTON PASSSING IN notebookToDelete
         dataController.viewContext.delete(notebookToDelete)
@@ -163,19 +192,17 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
         }
-        
-        // 4. REMOVE THE DELETED NOTEBOOK FROM THE NOTEBOOKS ARRAY
-        notebooks.remove(at: indexPath.row)
-        
-        tableView.deleteRows(at: [indexPath], with: .fade)
-        if numberOfNotebooks == 0 {
-            setEditing(false, animated: true)
-        }
-        updateEditButtonState()
     }
 
     func updateEditButtonState() {
-        navigationItem.rightBarButtonItem?.isEnabled = numberOfNotebooks > 0
+        
+        // GET THE NOTEBOOKS COUNT FROM THE FETCHED RESULTS CONTROLLER
+        // CONDITIONALLY UNWRAP THE sections PROPERTY
+        // CHECK .numberOfObjects IN THE FIRST (AND ONLY) SECTION
+        
+        if let sections = fetchedResultsController.sections {
+            navigationItem.rightBarButtonItem?.isEnabled = sections[0].numberOfObjects > 0
+        }
     }
 
     override func setEditing(_ editing: Bool, animated: Bool) {
@@ -187,15 +214,23 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
     // MARK: - Table view data source
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        // USE FETCHED RESULTS CONTROLLER'S sections PROPERTY TO FIND OUT
+        // HOW MANY SECTIONS THE DATA HAS
+        // THE SECTIONS PROPERTY IS OPTIONAL
+        // NIL-COALESCING OPERATOR
+        return fetchedResultsController.sections?.count ?? 1
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return numberOfNotebooks
+        // REFERENCE A SPECIFIC SECTION
+        // EACH SECTION HAS A PROPERTY .numberOfObjects
+        // WE WILL RETURN THE NUMBER OF OBJECTS, OTHERWISE 0
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let aNotebook = notebook(at: indexPath)
+        // GET THE NOTEBOOK FROM THE FETCHED RESULTS CONTROLLER (SPECIFICED WITH AN INDEX PATH)
+        let aNotebook = fetchedResultsController.object(at: indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: NotebookCell.defaultReuseIdentifier, for: indexPath) as! NotebookCell
 
         // Configure cell
@@ -216,14 +251,6 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         }
     }
 
-    // Helper
-
-    var numberOfNotebooks: Int { return notebooks.count }
-
-    func notebook(at indexPath: IndexPath) -> Notebook {
-        return notebooks[indexPath.row]
-    }
-
     // -------------------------------------------------------------------------
     // MARK: - Navigation
 
@@ -232,7 +259,8 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         if let vc = segue.destination as? NotesListViewController {
             if let indexPath = tableView.indexPathForSelectedRow {
                 // NOTEBOOK PASSING TO THE NotesListViewVC
-                vc.notebook = notebook(at: indexPath)
+                // USE FETCH RESULTS VIEW CONTROLLER'S .object(at:) method
+                vc.notebook = fetchedResultsController.object(at: indexPath)
             }
             // PASSING THE dataController from NotebooksListViewVC to NotesListViewVC
             vc.dataController = dataController
