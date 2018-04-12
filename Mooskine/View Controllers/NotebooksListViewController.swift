@@ -24,38 +24,13 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
     // LOADS THE DATA FROM PERSISTENT STORE INTO THE CONTEXT
     // MUST BE CONFIGURED WITH AN ENTITY TYPE
     // CAN OPTIONALLY INCLUDE FILTERING AND SORTING
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "toolbar-cow"))
         navigationItem.rightBarButtonItem = editButtonItem
         
-        // 1. CREATE FETCH REQUEST
-        // FETCH REQUESTS ARE GENERIC TYPES, SO YOU SPECIFY THE TYPE PARAMETER
-        // SPECIFYING THE TYPE PARAMETER WILL MAKE THE FETCH REQUEST
-        // WORK WITH A SPECIFIC MANAGED OBJECT SUBCLASS
-        // CALL THE TYPE FUNCTON FETCH REQUEST ON THAT SUBCLASS
-        // Pin.fetchRequest() returns a fetch request initialized with the entity
-        
-        let fetchRequest: NSFetchRequest<Notebook> = Notebook.fetchRequest()
-        
-        // 2. CONFIGURE FETCH REQUEST BY ADDING A SORT RULE
-        // fetchRequest.sortDescriptors property takes an array of sort descriptors
-        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        // 3. PERFORM THE FETCH REQUEST
-        // ASK A CONTEXT TO EXECUTE THE REQUEST
-        // ASK DATA CONTROLLER'S VIEW CONTEXT (PERSISTENT CONTROLLER'S VIEW CONTEXT)
-        // .fetch() CAN THROW AN ERROR
-        // SAVE THE RESULTS ONLY IF THE FETCH IS SUCCESSFUL
-        // USE try? TO CONVERT THE ERROR INTO AN OPTIONAL
-        if let result = try? dataController.viewContext.fetch(fetchRequest) {
-            notebooks = result
-            tableView.reloadData()
-        }
-        
-        updateEditButtonState()
+        reloadNotebooks()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -139,11 +114,35 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         }
      
         // 4. UPDATE UI
-        // INSERT NOTEBOOK AT POSITION 0, SINCE NOTEBOOKS ARE ORDERED BY CREATION DATE (LATEST ON TOP)
-        // WE WILL ALSO INSERT THE NOTEBOOK INTO THE 0TH ROW OF THE TABLE
+        reloadNotebooks()
+    }
+    
+    fileprivate func reloadNotebooks() {
+        // 1. CREATE FETCH REQUEST
+        // FETCH REQUESTS ARE GENERIC TYPES, SO YOU SPECIFY THE TYPE PARAMETER
+        // SPECIFYING THE TYPE PARAMETER WILL MAKE THE FETCH REQUEST
+        // WORK WITH A SPECIFIC MANAGED OBJECT SUBCLASS
+        // CALL THE TYPE FUNCTON FETCH REQUEST ON THAT SUBCLASS
+        // Pin.fetchRequest() returns a fetch request initialized with the entity
         
-        notebooks.insert(notebook, at: 0)
-        tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .fade)
+        let fetchRequest: NSFetchRequest<Notebook> = Notebook.fetchRequest()
+        
+        // 2. CONFIGURE FETCH REQUEST BY ADDING A SORT RULE
+        // fetchRequest.sortDescriptors property takes an array of sort descriptors
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        // 3. PERFORM THE FETCH REQUEST
+        // ASK A CONTEXT TO EXECUTE THE REQUEST
+        // ASK DATA CONTROLLER'S VIEW CONTEXT (PERSISTENT CONTROLLER'S VIEW CONTEXT)
+        // .fetch() CAN THROW AN ERROR
+        // SAVE THE RESULTS ONLY IF THE FETCH IS SUCCESSFUL
+        // USE try? TO CONVERT THE ERROR INTO AN OPTIONAL
+        if let result = try? dataController.viewContext.fetch(fetchRequest) {
+            notebooks = result
+            tableView.reloadData()
+        }
+        
         updateEditButtonState()
     }
 
