@@ -123,7 +123,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         
         // 2..CONFIGURE THE NOTEBOOK MANAGED OBJECT
         notebook.name = name
-        notebook.creationDate = Date()
+        // CREATION DATE ADDED IN THE NOTEBOOK'S INITIALIZATION (in Notebook+Extensions)
         
         // 3. SAVE THE NOTE ASSOCIATED WITH A CONTEXT
         // AS SOON AS THE NOTEBOOK IS CREATED, WE WILL ASK THE CONTEXT TO SAVE THE NOTEBOOK INTO THE PERSISTENT STORE

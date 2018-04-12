@@ -119,7 +119,7 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
         
         // 2. CONFIGURE THE NOTE MANAGED OBJECT
         note.text = "New Note"
-        note.creationDate = Date()
+       // CREATION DATE ADDED IN INITIALIZATION (in Note+Extensions)
         note.notebook = notebook
         
         // 3. SAVE THE NOTE ASSOCIATED WITH A CONTEXT
