@@ -28,7 +28,7 @@ class NoteDetailsViewController: UIViewController {
         df.dateStyle = .medium
         return df
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         if let creationDate = note.creationDate {

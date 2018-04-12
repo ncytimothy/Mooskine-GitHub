@@ -48,13 +48,25 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         
         // 2. CONFIGURE FETCH REQUEST BY ADDING A SORT RULE
         // fetchRequest.sortDescriptors property takes an array of sort descriptors
+        // NOTICE THAT THE ORDER IN WHICH THE FETCH HAPPENS IS SPECIFIED BY THE SORT DESCRIPTORS
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
         // 2. INSTANTIATE THE FETCHED RESULTS CONTROLLER USING THE FETCH REQUEST
         // sectionNameKeyPath: divides data into sections
         // cacheName: LATER
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        // FETCHED RESULTS CONTROLLER CAN AVOID REPETITIVE WORK BY CACHING SECTION AND ORDERING INFORMATION
+        // THIS WILL IMPROVE PERFORMANCE
+        // IF YOU SPECIFY A cacheName, CACHING WILL HAPPEN AUTOMATICALLY AND THE CACHE WILL PERSIST
+        // BETWEEN SESSIONS
+        // CACHE UPDATES ITSELF AUTOMATICALLY WHEN SECTION OR ORDERING INFORMATION CHANGES
+        // WITH MULTIPLE FETCHED RESULTS CONTROLLERS, EACH SHOULD HAVE THEIR OWN CACHE NAME
+        
+        // IF YOU EVER CHANGE THE FETCH RESULT OF A FETCHED RESULTS CONTROLLER
+        // YOU SHOULD DELETE THE CACHE MANUALLY FIRST
+        // USE deleteCache(withName:)
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "notebooks")
         
         // 3. SET THE FETCHED RESULTS CONTROLLER DELEGATE PROPERTY TO SELF
         // FETCHED RESULTS CONTROLLER TRACKS CHANGES
@@ -275,10 +287,14 @@ extension NotebooksListViewController: NSFetchedResultsControllerDelegate {
     
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         // GETS CALLED BEFORE A BATCH OF UPDATES
+        // BEGIN UPDATES IS IMPORTANT TO TRACK CHANGES IN THE MODEL AND REACTIVELY UPDATE THE TABLE VIEW
+        // THIS IS REFERRING TO THE TABLEVIEW'S DATA SOURCE
         tableView.beginUpdates()
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        // END UPDATES IS IMPORTANT TO TRACK CHANGES IN THE MODEL AND REACTIVELY UPDATE THE TABLE VIEW
+        // THIS IS REFERRING TO THE TABLEVIEW'S DATA SOURCE
         tableView.endUpdates()
     }
     
