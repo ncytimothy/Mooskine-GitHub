@@ -91,6 +91,8 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
         }
         // RELOAD DATA ONCE THE TABLE VIEW WILL APPEAR
         tableView.reloadData()
+        
+        //fix 
     }
 
     // -------------------------------------------------------------------------
