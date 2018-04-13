@@ -201,11 +201,9 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
     }
 
     func updateEditButtonState() {
-//        if let sections = fetchedResultsController.sections {
-//            navigationItem.rightBarButtonItem?.isEnabled = sections[0].numberOfObjects > 0
-//        }
-        
-        navigationItem.rightBarButtonItem?.isEnabled = true
+        if let sections = fetchedResultsController.sections {
+            navigationItem.rightBarButtonItem?.isEnabled = sections[0].numberOfObjects > 0
+        }
     }
 
     override func setEditing(_ editing: Bool, animated: Bool) {
