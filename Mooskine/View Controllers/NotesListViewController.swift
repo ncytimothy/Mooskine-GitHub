@@ -220,7 +220,6 @@ class NotesListViewController: UIViewController, UITableViewDataSource {
         // THE SECTIONS PROPERTY IS OPTIONAL
         // NIL-COALESCING OPERATOR
         // GET THE NUMBER OF SECTIONS FROM PERSISTENT STORE, OTHERWISE 1
-        print("numberOfSections")
         return fetchedResultsController.sections?.count ?? 1
     }
 
@@ -295,10 +294,8 @@ extension NotesListViewController: NSFetchedResultsControllerDelegate {
             // indexPath PARAMETER CONTAINS THE INDEX PATH OF THE ROW TO DELETE
             tableView.deleteRows(at: [indexPath!], with: .fade)
             break
-        case .update:
-            tableView.reloadRows(at: [indexPath!], with: .fade)
-        case .move:
-            tableView.moveRow(at: indexPath!, to: newIndexPath!)
+        default:
+            break
         }
         
     }
