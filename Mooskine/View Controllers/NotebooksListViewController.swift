@@ -54,7 +54,6 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         
         // 2. INSTANTIATE THE FETCHED RESULTS CONTROLLER USING THE FETCH REQUEST
         // sectionNameKeyPath: divides data into sections
-        // cacheName: LATER
         // FETCHED RESULTS CONTROLLER CAN AVOID REPETITIVE WORK BY CACHING SECTION AND ORDERING INFORMATION
         // THIS WILL IMPROVE PERFORMANCE
         // IF YOU SPECIFY A cacheName, CACHING WILL HAPPEN AUTOMATICALLY AND THE CACHE WILL PERSIST
@@ -80,6 +79,8 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             // FATAL ERROR IS THROWN IF FETCH FAILS
             fatalError("The fetch cannot be performed: \(error.localizedDescription)")
         }
+        
+        // 5. REMOVE THE FETCHED RESULTS CONTROLLER WHEN THE VIEW DISAPPEARS
     }
     
     override func viewDidLoad() {
@@ -182,6 +183,8 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         }
      
         // 4. UPDATE UI
+        // REPLACE UPDATE UI CODE TO EXTENSION, WHERE THE FETCHED RESULTS HANDLES THE CHANGES IN
+        // THE MODEL, AND THE CHANGES IN THE UI
         
     }
     
@@ -204,6 +207,11 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
         }
+        
+        // 4. UPDATE UI
+        // REPLACE UPDATE UI CODE TO EXTENSION, WHERE THE FETCHED RESULTS HANDLES THE CHANGES IN
+        // THE MODEL, AND THE CHANGES IN THE UI
+        
     }
 
     func updateEditButtonState() {
@@ -230,6 +238,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         // HOW MANY SECTIONS THE DATA HAS
         // THE SECTIONS PROPERTY IS OPTIONAL
         // NIL-COALESCING OPERATOR
+        // GET THE NUMBER OF SECTIONS FROM PERSISTENT STORE, OTHERWISE 1
         return fetchedResultsController.sections?.count ?? 1
     }
 
@@ -282,22 +291,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
 
 extension NotebooksListViewController: NSFetchedResultsControllerDelegate {
     
-    // TABLE VIEW CHANGES NEED TO BE BOOKENDED BETWEEN .beginUpdates() AND .endUpdates() CALLS
-    // REACTIVE TABLE VIEW THAT AUTOMATICALLY RESPONSES TO INSERTS AND DELETES
-    
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        // GETS CALLED BEFORE A BATCH OF UPDATES
-        // BEGIN UPDATES IS IMPORTANT TO TRACK CHANGES IN THE MODEL AND REACTIVELY UPDATE THE TABLE VIEW
-        // THIS IS REFERRING TO THE TABLEVIEW'S DATA SOURCE
-        tableView.beginUpdates()
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        // END UPDATES IS IMPORTANT TO TRACK CHANGES IN THE MODEL AND REACTIVELY UPDATE THE TABLE VIEW
-        // THIS IS REFERRING TO THE TABLEVIEW'S DATA SOURCE
-        tableView.endUpdates()
-    }
-    
+    // 1. CONFIGURE THE UI WHEN DATA MODEL DID CHANGE
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         // Notifies the receiver that a fetched object has been changed due to an add, remove, move, or update.
         // type is an enum
@@ -318,5 +312,25 @@ extension NotebooksListViewController: NSFetchedResultsControllerDelegate {
         }
         
     }
+    
+    // 2. BEGIN UI UPDATES WHEN DATA MODEL WILL CHANGE CONTENT
+    // TABLE VIEW CHANGES NEED TO BE BOOKENDED BETWEEN .beginUpdates() AND .endUpdates() CALLS
+    // REACTIVE TABLE VIEW THAT AUTOMATICALLY RESPONSES TO INSERTS AND DELETES
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        // GETS CALLED BEFORE A BATCH OF UPDATES
+        // BEGIN UPDATES IS IMPORTANT TO TRACK CHANGES IN THE MODEL AND REACTIVELY UPDATE THE TABLE VIEW
+        // THIS IS REFERRING TO THE TABLEVIEW'S DATA SOURCE
+        tableView.beginUpdates()
+    }
+    
+    // 3. END UI UPDATES WHEN DATA MODEL DID CHANGE CONTENT
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        // END UPDATES IS IMPORTANT TO TRACK CHANGES IN THE MODEL AND REACTIVELY UPDATE THE TABLE VIEW
+        // THIS IS REFERRING TO THE TABLEVIEW'S DATA SOURCE
+        tableView.endUpdates()
+    }
+    
+   
     
 }
