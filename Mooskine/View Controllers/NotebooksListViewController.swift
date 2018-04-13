@@ -52,7 +52,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
-        // 2. INSTANTIATE THE FETCHED RESULTS CONTROLLER USING THE FETCH REQUEST
+        // 3. INSTANTIATE THE FETCHED RESULTS CONTROLLER USING THE FETCH REQUEST
         // sectionNameKeyPath: divides data into sections
         // FETCHED RESULTS CONTROLLER CAN AVOID REPETITIVE WORK BY CACHING SECTION AND ORDERING INFORMATION
         // THIS WILL IMPROVE PERFORMANCE
@@ -67,12 +67,12 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "notebooks")
         
-        // 3. SET THE FETCHED RESULTS CONTROLLER DELEGATE PROPERTY TO SELF
+        // 4. SET THE FETCHED RESULTS CONTROLLER DELEGATE PROPERTY TO SELF
         // FETCHED RESULTS CONTROLLER TRACKS CHANGES
         // TO RESPONSE TO THOSE CHANGES, NEED TO IMPLEMENT SOME DELEGATE METHODS
         fetchedResultsController.delegate = self
         
-        // 4. PERFORM FETCH TO LOAD DATA AND START TRACKING
+        // 5. PERFORM FETCH TO LOAD DATA AND START TRACKING
         do {
             try fetchedResultsController.performFetch()
         } catch {
@@ -80,7 +80,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
             fatalError("The fetch cannot be performed: \(error.localizedDescription)")
         }
         
-        // 5. REMOVE THE FETCHED RESULTS CONTROLLER WHEN THE VIEW DISAPPEARS
+        // 6. REMOVE THE FETCHED RESULTS CONTROLLER WHEN THE VIEW DISAPPEARS
     }
     
     override func viewDidLoad() {
@@ -91,7 +91,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         setUpFetchedResultsController()
     
         
-        // 5. IMPLEMENT DELEGATE METHODS FOR FETCHED RESULTS CONTROLLER TO TRACK CHANGES
+        // 7. IMPLEMENT DELEGATE METHODS FOR FETCHED RESULTS CONTROLLER TO TRACK CHANGES
         // (IN EXTENSION)
         
     }
